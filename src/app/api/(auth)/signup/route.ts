@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import prisma from '../../../../../prisma'
 import bcrypt from 'bcryptjs'
-import { setCookie } from '@/utils/generateToken'
+import { generateJWT, setCookie } from '@/utils/generateToken'
 
 /**
  *  @method  POST
@@ -12,9 +12,15 @@ import { setCookie } from '@/utils/generateToken'
 export async function POST(request: NextRequest) {
   try {
     const { name, email, password } = await request.json()
-    if (!name && !email && !password) {
+    const token = generateJWT({
+      name,
+      email,
+    })
+
+    if (!name && !email && !password && !token) {
       return NextResponse.json({ error: 'Invalid Data' }, { status: 422 })
     }
+
     const existingUser = await prisma.user.findFirst({ where: { email } })
     if (existingUser) {
       return NextResponse.json(
@@ -26,12 +32,12 @@ export async function POST(request: NextRequest) {
     }
     const salt = await bcrypt.genSalt(10)
     const hashedPassword = await bcrypt.hash(password, salt)
+
     const user = await prisma.user.create({
-      data: { name, email, password: hashedPassword },
+      data: { name, email, password: hashedPassword, token },
     })
 
     const cookie = setCookie({
-      id: user.id,
       name: user.name,
       email: user.email,
     })
@@ -41,7 +47,7 @@ export async function POST(request: NextRequest) {
     }
 
     return NextResponse.json(
-      { ...user, message: 'Registered & Authenticated' },
+      { ...user, message: 'Registered & Authenticated', token },
       {
         status: 201,
         headers: { 'Set-Cookie': cookie },

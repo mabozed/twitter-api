@@ -12,7 +12,6 @@ export async function GET() {
     const users = await prisma.user.findMany({
       include: { tweets: true, _count: true },
     })
-    console.log(users)
 
     if (!users) {
       return NextResponse.json({ message: 'user not found' }, { status: 404 })

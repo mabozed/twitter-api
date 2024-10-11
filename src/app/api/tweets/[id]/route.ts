@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import prisma from '../../../../../prisma'
-import { verifyToken } from '@/utils/verifyToken'
+// import { verifyToken } from '@/utils/verifyToken'
 
 /**
  *  @method  GET
@@ -10,7 +10,7 @@ import { verifyToken } from '@/utils/verifyToken'
  */
 
 export async function GET(
-  req: NextRequest,
+  request: NextRequest,
   { params }: { params: { id: string } }
 ) {
   try {
@@ -35,11 +35,11 @@ export async function GET(
  */
 
 export async function PUT(
-  req: NextRequest,
+  request: NextRequest,
   { params }: { params: { id: string } }
 ) {
   try {
-    const { tweet, userId } = await req.json()
+    const { tweet, userId } = await request.json()
 
     if (!tweet && !userId) {
       return NextResponse.json({ error: 'Invalid Data' }, { status: 422 })
@@ -49,9 +49,10 @@ export async function PUT(
     if (!user) {
       return NextResponse.json({ message: 'Invalid User' }, { status: 500 })
     }
-    const userFromToken = verifyToken(req)
+    // const userFromToken = verifyToken(req)
 
-    if (userFromToken === null || userFromToken.id !== user.id) {
+    const HeaderToken = request.headers.get('token')
+    if (HeaderToken === null || HeaderToken !== user.token) {
       return NextResponse.json(
         { message: 'you are not allowed, access denied' },
         { status: 403 }
@@ -78,11 +79,11 @@ export async function PUT(
  */
 
 export async function DELETE(
-  req: NextRequest,
+  request: NextRequest,
   { params }: { params: { id: string } }
 ) {
   try {
-    const { tweet, userId } = await req.json()
+    const { tweet, userId } = await request.json()
 
     console.log(userId)
 
@@ -96,9 +97,8 @@ export async function DELETE(
     if (!user) {
       return NextResponse.json({ message: 'Invalid User' }, { status: 500 })
     }
-    const userFromToken = verifyToken(req)
-
-    if (userFromToken === null || userFromToken.id !== user.id) {
+    const HeaderToken = request.headers.get('token')
+    if (HeaderToken === null || HeaderToken !== user.token) {
       return NextResponse.json(
         { message: 'you are not allowed, access denied' },
         { status: 403 }

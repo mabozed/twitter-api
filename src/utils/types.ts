@@ -1,7 +1,7 @@
 // import { ObjectId } from 'mongodb'
 
 export type JWTPayload = {
-  id: string
+  // id: string
   name: string
   email: string
 }

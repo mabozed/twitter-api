@@ -13,13 +13,28 @@ export function verifyToken(request: NextRequest): JWTPayload | null {
 
     const privateKey = process.env.JWT_SECRET as string
     const userPayload = jwt.verify(token, privateKey) as JWTPayload
-
     return userPayload
     // eslint-disable-next-line
   } catch (error) {
     return null
   }
 }
+
+// export function verifyHeadersToken(request: NextRequest): JWTPayload | null {
+//   try {
+//     const token = request.headers.get('token')
+
+//     if (!token) return null
+
+//     const privateKey = process.env.JWT_SECRET as string
+//     const userPayload = jwt.verify(token, privateKey) as JWTPayload
+
+//     return userPayload
+//     // eslint-disable-next-line
+//   } catch (error) {
+//     return null
+//   }
+// }
 
 // Verify Token For Page
 // export function verifyTokenForPage(token: string): JWTPayload | null {

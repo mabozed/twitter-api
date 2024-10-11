@@ -33,22 +33,23 @@ export async function POST(request: NextRequest) {
     }
 
     // const userFromToken = verifyToken(request)
-    // console.log(userFromToken)
-    // if (userFromToken === null || userFromToken.id !== existingUser.id) {
-    //   return NextResponse.json(
-    //     { message: 'you are not allowed, access denied' },
-    //     { status: 403 }
-    //   )
-    // }
+    const HeaderToken = request.headers.get('token')
+    if (HeaderToken === null || HeaderToken !== existingUser.token) {
+      return NextResponse.json(
+        { message: 'you are not allowed, access denied' },
+        { status: 403 }
+      )
+    }
 
     const cookie = setCookie({
-      id: existingUser.id,
       name: existingUser.name,
       email: existingUser.email,
     })
 
+    const token = existingUser.token
+
     return NextResponse.json(
-      { message: 'Authenticated' },
+      { message: 'Authenticated', token },
       {
         status: 200,
         headers: { 'Set-Cookie': cookie },

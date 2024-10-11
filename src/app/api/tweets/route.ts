@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
 import prisma from '../../../../prisma'
-import { verifyToken } from '@/utils/verifyToken'
 
 /**
  *  @method  GET
@@ -49,8 +48,8 @@ export async function POST(request: NextRequest) {
     if (!user) {
       return NextResponse.json({ message: 'Invalid User' }, { status: 500 })
     }
-    const userFromToken = verifyToken(request)
-    if (userFromToken === null || userFromToken.id !== user.id) {
+    const HeaderToken = request.headers.get('token')
+    if (HeaderToken === null || HeaderToken !== user.token) {
       return NextResponse.json(
         { message: 'you are not allowed, access denied' },
         { status: 403 }

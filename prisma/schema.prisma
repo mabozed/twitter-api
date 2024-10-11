@@ -18,6 +18,7 @@ model User {
   name     String
   email    String   @unique
   password String
+  token    String   @unique
   tweets   Tweets[]
 }
 
@@ -26,7 +27,6 @@ model Tweets {
   tweet       String
   createdDate DateTime @default(now())
   updatedDate DateTime @updatedAt
-
-  User   User?   @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId String? @db.ObjectId
+  User        User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId      String?  @db.ObjectId
 }
