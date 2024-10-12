@@ -2,13 +2,8 @@ import { NextResponse, NextRequest } from 'next/server'
 
 // import { verifyToken } from '@/utils/verifyToken'
 
-import prisma from '../../../../../../prisma'
+import prisma from '../../../../../prisma'
 import { verifyToken } from '@/utils/verifyToken'
-
-// import { verifyToken } from '@/utils/verifyToken'
-// import { UpdateUserDto } from '@/utils/dtos'
-// import bcrypt from 'bcryptjs'
-// import { updateUserSchema } from '@/utils/validationSchemas'
 
 interface Props {
   params: { id: string }
@@ -16,7 +11,7 @@ interface Props {
 
 /**
  *  @method  GET
- *  @route   ~/api/profile/:id
+ *  @route   ~/api/users/:id
  *  @desc    Get Profile By Id
  *  @access  private (only user himself can get his account/profile)
  */
@@ -24,6 +19,7 @@ export async function GET(request: NextRequest, { params }: Props) {
   try {
     const user = await prisma.user.findUnique({
       where: { id: params.id },
+      include: { tweets: true, _count: true },
     })
 
     if (!user) {

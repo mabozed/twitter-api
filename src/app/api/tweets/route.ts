@@ -35,7 +35,7 @@ export async function GET() {
  *  @method  POST
  *  @route   ~/api/tweets
  *  @desc    Create New Tweet
- *  @access  public
+ *  @access  private
  */
 export async function POST(request: NextRequest) {
   try {

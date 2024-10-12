@@ -1,6 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
+// import { NextResponse } from 'next/server'
 import prisma from '../../../../../prisma'
 // import { verifyToken } from '@/utils/verifyToken'
+
+interface tweetsProps {
+  params: { id: string }
+}
 
 /**
  *  @method  GET
@@ -9,12 +14,11 @@ import prisma from '../../../../../prisma'
  *  @access  public
  */
 
-export async function GET(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function GET(request: NextRequest, { params }: tweetsProps) {
   try {
-    const tweet = await prisma.tweets.findFirst({ where: { id: params.id } })
+    const tweet = await prisma.tweets.findFirst({
+      where: { id: params.id },
+    })
 
     if (!tweet) {
       return NextResponse.json({ message: 'tweet not found' }, { status: 404 })
@@ -34,33 +38,46 @@ export async function GET(
  *  @access  private (Only User Can Edit)
  */
 
-export async function PUT(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function PUT(request: NextRequest, { params }: tweetsProps) {
   try {
-    const { tweet, userId } = await request.json()
+    const { newTweet } = await request.json()
 
-    if (!tweet && !userId) {
-      return NextResponse.json({ error: 'Invalid Data' }, { status: 422 })
-    }
-    const user = await prisma.user.findFirst({ where: { id: userId } })
+    const tweet = await prisma.tweets.findFirst({
+      where: { id: params.id },
+    })
 
-    if (!user) {
-      return NextResponse.json({ message: 'Invalid User' }, { status: 500 })
-    }
-    // const userFromToken = verifyToken(req)
-
-    const HeaderToken = request.headers.get('token')
-    if (HeaderToken === null || HeaderToken !== user.token) {
+    if (!tweet) {
       return NextResponse.json(
-        { message: 'you are not allowed, access denied' },
-        { status: 403 }
+        { error: 'the tweet is Not Found' },
+        { status: 404 }
       )
     }
 
+    if (!newTweet) {
+      return NextResponse.json({ error: 'Invalid Data' }, { status: 422 })
+    }
+
+    const HeaderToken = request.headers.get('token')
+    if (HeaderToken) {
+      const user = await prisma.user.findFirst({
+        where: { token: HeaderToken },
+      })
+
+      if (!user || tweet.userId !== user.id) {
+        return NextResponse.json({ message: 'Invalid User' }, { status: 500 })
+      }
+      // const userFromToken = verifyToken(req)
+
+      if (HeaderToken === null || HeaderToken !== user.token) {
+        return NextResponse.json(
+          { message: 'you are not allowed, access denied' },
+          { status: 403 }
+        )
+      }
+    }
+
     const updatedTweet = await prisma.tweets.update({
-      data: { tweet },
+      data: { tweet: newTweet },
       where: { id: params.id },
     })
 
@@ -83,26 +100,22 @@ export async function DELETE(
   { params }: { params: { id: string } }
 ) {
   try {
-    const { tweet, userId } = await request.json()
-
-    console.log(userId)
-
-    if (!tweet && !userId) {
-      return NextResponse.json({ error: 'Invalid Data' }, { status: 422 })
-    }
-    const user = await prisma.user.findFirst({
-      where: { id: userId },
-    })
-
-    if (!user) {
-      return NextResponse.json({ message: 'Invalid User' }, { status: 500 })
-    }
     const HeaderToken = request.headers.get('token')
-    if (HeaderToken === null || HeaderToken !== user.token) {
-      return NextResponse.json(
-        { message: 'you are not allowed, access denied' },
-        { status: 403 }
-      )
+    if (HeaderToken) {
+      const user = await prisma.user.findFirst({
+        where: { token: HeaderToken },
+      })
+      if (!user) {
+        return NextResponse.json({ message: 'Invalid User' }, { status: 500 })
+      }
+      // const userFromToken = verifyToken(req)
+
+      if (HeaderToken === null || HeaderToken !== user.token) {
+        return NextResponse.json(
+          { message: 'you are not allowed, access denied' },
+          { status: 403 }
+        )
+      }
     }
 
     const DeletedTweet = await prisma.tweets.delete({
