@@ -37,10 +37,7 @@ export async function POST(request: NextRequest) {
       data: { name, email, password: hashedPassword, token },
     })
 
-    const cookie = setCookie({
-      name: user.name,
-      email: user.email,
-    })
+    const cookie = setCookie(token)
 
     if (!user) {
       return NextResponse.json({ message: 'user not found' }, { status: 404 })

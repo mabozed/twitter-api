@@ -41,12 +41,8 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const cookie = setCookie({
-      name: existingUser.name,
-      email: existingUser.email,
-    })
-
     const token = existingUser.token
+    const cookie = setCookie(token)
 
     return NextResponse.json(
       { message: 'Authenticated', token },
